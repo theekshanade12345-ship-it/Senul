@@ -40,7 +40,9 @@ button {background-color:#4CAF50; color:white; cursor:pointer;}
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
+// Firebase configuration (from your snippet)
 const firebaseConfig = {
   apiKey: "AIzaSyACPs6N80C3i8SS3aG7ahybThWvsPSf19o",
   authDomain: "senul-80301.firebaseapp.com",
@@ -50,6 +52,8 @@ const firebaseConfig = {
   appId: "1:718343352275:web:7c0e22dd69981690df8926",
   measurementId: "G-KFYWFF619M"
 };
+
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
