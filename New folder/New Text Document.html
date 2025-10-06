@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Number Draw</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #8EC5FC, #E0C3FC);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    h1 { color: #333; }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 500px;
+      margin-top: 20px;
+    }
+    .card {
+      width: 100px;
+      height: 140px;
+      background: white;
+      border-radius: 10px;
+      margin: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      cursor: pointer;
+      transition: transform 0.5s;
+    }
+    .flipped {
+      background: #4CAF50;
+      color: white;
+      transform: rotateY(180deg);
+    }
+    .admin-panel {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      margin-top: 20px;
+    }
+    input, button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      margin: 5px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    #login-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎲 Random Number Draw 🎲</h1>
+
+  <!-- Name input section -->
+  <div id="name-section">
+    <input type="text" id="username" placeholder="ඔයාගේ නම ලියන්න" />
+    <button id="startBtn">Start</button>
+  </div>
+
+  <!-- Cards container -->
+  <div class="card-container" id="cards" style="display:none;"></div>
+
+  <!-- Admin login section -->
+  <div id="login-section">
+    <input type="password" id="adminPass" placeholder="Admin Password" />
+    <button id="loginBtn">Admin Login</button>
+  </div>
+
+  <!-- Admin panel -->
+  <div class="admin-panel" id="adminPanel">
+    <h2>🧑‍💼 Admin Panel</h2>
+    <div id="results"></div>
+    <button id="resetBtn">🔄 Reset All</button>
+  </div>
+
+  <script>
+    // All numbers except 1 (assigned to admin/user1)
+    const allNumbers = [2,3,4,5,6,7,8,9,10];
+    let availableNumbers = [...allNumbers];
+    const assigned = [];
+
+    const startBtn = document.getElementById("startBtn");
+    const usernameInput = document.getElementById("username");
+    const cardsContainer = document.getElementById("cards");
+    const adminPanel = document.getElementById("adminPanel");
+    const results = document.getElementById("results");
+
+    // Load saved data from localStorage
+    function loadData(){
+      const data = JSON.parse(localStorage.getItem("assignedData")) || [];
+      data.forEach(d => assigned.push(d));
+      data.forEach(d=>{
+        const index = availableNumbers.indexOf(d.number);
+        if(index !== -1) availableNumbers.splice(index,1);
+      });
+      return data;
+    }
+
+    function saveData(){
+      localStorage.setItem("assignedData", JSON.stringify(assigned));
+    }
+
+    loadData();
+
+    // Start button click
+    startBtn.onclick = () => {
+      const username = usernameInput.value.trim();
+      if(!username) return alert("කරුණාකර නම ඇතුළත් කරන්න!");
+      document.getElementById("name-section").style.display = "none";
+      cardsContainer.style.display = "flex";
+      cardsContainer.innerHTML = "";
+
+      availableNumbers.forEach((n)=>{
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerText = "❓";
+        card.onclick = ()=>{
+          if(card.classList.contains("flipped")) return;
+          const randomIndex = Math.floor(Math.random()*availableNumbers.length);
+          const number = availableNumbers[randomIndex];
+          availableNumbers.splice(randomIndex,1);
+          card.classList.add("flipped");
+          card.innerText = number;
+          assigned.push({name: username, number});
+          saveData();
+          alert(`${username}ට අංක ${number} ලැබුණා!`);
+          setTimeout(()=>{location.reload()},1000);
+        };
+        cardsContainer.appendChild(card);
+      });
+    };
+
+    // Admin login
+    document.getElementById("loginBtn").onclick = () => {
+      const pass = document.getElementById("adminPass").value;
+      if(pass === "Senul123"){
+        document.getElementById("login-section").style.display = "none";
+        adminPanel.style.display = "flex";
+        const data = loadData();
+        if(data.length === 0){
+          results.innerHTML = "<p>තවම කවුරුත් අංකයක් ගෙන නැහැ.</p>";
+        } else {
+          results.innerHTML = data.map(d=>`<p>${d.name} → ${d.number}</p>`).join("");
+        }
+      } else {
+        alert("Wrong Password!");
+      }
+    };
+
+    // Reset button
+    document.getElementById("resetBtn").onclick = () => {
+      if(confirm("ඔයාට ඇත්තම reset කරන්න ඕනෙද? මේක සම්පූර්ණ data clear කරනවා.")){
+        localStorage.clear();
+        location.reload();
+      }
+    };
+  </script>
+</body>
+</html>
