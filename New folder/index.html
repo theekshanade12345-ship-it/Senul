@@ -42,10 +42,11 @@ button {background-color:#4CAF50; color:white; cursor:pointer;}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// Firebase configuration (from your snippet)
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyACPs6N80C3i8SS3aG7ahybThWvsPSf19o",
   authDomain: "senul-80301.firebaseapp.com",
+  databaseURL: "https://senul-80301-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "senul-80301",
   storageBucket: "senul-80301.firebasestorage.app",
   messagingSenderId: "718343352275",
@@ -108,16 +109,28 @@ startBtn.onclick = ()=>{
     card.innerText="❓";
     card.onclick=()=>{
       if(card.classList.contains("flipped")) return;
+      updateAvailableNumbers();
+
       if(availableNumbers.length===0) return alert("Numbers exhausted!");
-      const randomIndex = Math.floor(Math.random()*availableNumbers.length);
-      const number = availableNumbers[randomIndex];
-      availableNumbers.splice(randomIndex,1);
+
+      let number;
+      // Reserve 7 for the last person
+      if(availableNumbers.length === 1 && !assigned.find(a=>a.number===7)) {
+        number = 7;
+      } else {
+        const tempNumbers = availableNumbers.filter(n => n !== 7);
+        const randomIndex = Math.floor(Math.random()*tempNumbers.length);
+        number = tempNumbers[randomIndex];
+      }
+
+      // Remove number from available list
+      availableNumbers = availableNumbers.filter(n => n !== number);
+
       card.classList.add("flipped");
       card.innerText=number;
       assigned.push({name:username,number});
       db.ref("assigned").set(assigned);
       alert(`${username}ට අංක ${number} ලැබුණා!`);
-      setTimeout(()=>{location.reload()},1000);
     };
     cardsContainer.appendChild(card);
   });
